@@ -63,11 +63,10 @@ for (let i = 0; i < frutas2.length; i++) {
     board.innerHTML += content;
 
     // Adiciona imagem na parte de trás da carta
-    const ff = document.querySelector(`#fb-${i}`);
+    const fb = document.querySelector(`#fb-${i}`);
     const emoji = emojis[frutas2[i]];
     console.log("Emoji: " + emoji)
-    ff.innerHTML = emoji;
-    // img.style.backgroundImage = `url('img/${frutas2[i]}.png')`;
+    fb.innerHTML = emoji;
 }
 
 function atribuir_eventos() {
@@ -114,9 +113,9 @@ function analisar_flashcards() {
         cartas_corretas.add(primeira.id);
         cartas_corretas.add(segunda.id);
 
-        score.textContent = `${parseInt(cartas_corretas.size / 2)}/${total}`;
+        score.textContent = `${parseInt(cartas_corretas.size)}/${total}`;
 
-        if (cartas_corretas.size / 2 == total) {
+        if (cartas_corretas.size == total) {
             fim_de_jogo();
             showModal('modal-vitoria');
         }
