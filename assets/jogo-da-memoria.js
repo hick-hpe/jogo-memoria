@@ -2,7 +2,7 @@
 const board = document.querySelector('#board');
 const tempo = document.querySelector('#tempo');
 const resetButton = document.querySelector('#resetButton');
-const score = document.querySelector('#score');
+const cartas = document.querySelector('#cartas');
 fecharModal('modal-vitoria');
 fecharModal('modal-derrota');
 const TEMPO_TOTAL = 60;
@@ -27,6 +27,7 @@ let frutas = [
     'mirtilos', 'mirtilos',
     'kiwi', 'kiwi'
 ];
+let frutas2 = [];
 let emojis = {
     'abacaxi': '🍍',
     'pera': '🍐',
@@ -44,30 +45,33 @@ let emojis = {
 let total = parseInt(frutas.length);
 let frutas_escolhidas = [];
 let cartas_corretas = new Set(); // Armazena IDs das cartas já acertadas
-score.textContent = `${parseInt(cartas_corretas.size / 2)}/${total}`;
+cartas.textContent = `${parseInt(cartas_corretas.size / 2)}/${total}`;
 
 // Embaralhar (Fisher-Yates)
-let frutas2 = [...frutas].sort(() => Math.random() - 0.5);
+function embaralhar_frutas() {
+    frutas2 = [...frutas].sort(() => Math.random() - 0.5);
 
-// Adicionar na tela
-board.innerHTML = '';
-for (let i = 0; i < frutas2.length; i++) {
-    const content = `
-        <div class="flashcard">
-            <div class="flashcard-inner" id="flashcard-${i}">
-                <div class="flashcard-front" id="ff-${i}"></div>
-                <div class="flashcard-back" id="fb-${i}"></div>  
+    // Adicionar na tela
+    board.innerHTML = '';
+    for (let i = 0; i < frutas2.length; i++) {
+        const content = `
+            <div class="flashcard">
+                <div class="flashcard-inner" id="flashcard-${i}">
+                    <div class="flashcard-front" id="ff-${i}"></div>
+                    <div class="flashcard-back" id="fb-${i}"></div>  
+                </div>
             </div>
-        </div>
-    `;
-    board.innerHTML += content;
+        `;
+        board.innerHTML += content;
 
-    // Adiciona imagem na parte de trás da carta
-    const fb = document.querySelector(`#fb-${i}`);
-    const emoji = emojis[frutas2[i]];
-    console.log("Emoji: " + emoji)
-    fb.innerHTML = emoji;
+        // Adiciona imagem na parte de trás da carta
+        const fb = document.querySelector(`#fb-${i}`);
+        const emoji = emojis[frutas2[i]];
+        console.log("Emoji: " + emoji)
+        fb.innerHTML = emoji;
+    }
 }
+
 
 function atribuir_eventos() {
     flashcards = document.querySelectorAll('.flashcard');
@@ -113,7 +117,7 @@ function analisar_flashcards() {
         cartas_corretas.add(primeira.id);
         cartas_corretas.add(segunda.id);
 
-        score.textContent = `${parseInt(cartas_corretas.size)}/${total}`;
+        cartas.textContent = `${parseInt(cartas_corretas.size)}/${total}`;
 
         if (cartas_corretas.size == total) {
             fim_de_jogo();
@@ -139,6 +143,10 @@ function fim_de_jogo() {
     clearInterval(interval);
     console.log('Fim de jogo!');
     resetButton.disabled = false;
+    resetButton.textContent = 'Jogar de novo';
+    resetButton.style.backgroundColor = '#f44336';
+    segundos = TEMPO_TOTAL;
+    cartas.textContent = segundos;
     retirar_eventos();
 }
 
@@ -162,8 +170,6 @@ function iniciar_tempo() {
             } else {
                 fim_de_jogo();
                 showModal('modal-derrota');
-                resetButton.textContent = 'Reiniciar';
-                resetButton.style.backgroundColor = '#f44336';
             }
         }, 1000);
     }, 1500);
@@ -173,19 +179,21 @@ function iniciar_tempo() {
 
 // reiniciar jogo
 resetButton.addEventListener('click', () => {
-    if (resetButton.textContent == 'Iniciar') {
+    if (resetButton.textContent == 'Jogar') {
         stateGame = STATES[1];
         resetButton.disabled = true;
-        segundos = TEMPO_TOTAL;
         atribuir_eventos();
         iniciar_tempo();
     } else {
         tempo.textContent = formatar_tempo();
         resetButton.disabled = true;
+        resetButton.style.backgroundColor = '#ccc';
 
         // Resetar variáveis
         cartas_corretas.clear();
+        cartas.textContent = `${parseInt(cartas_corretas.size)}/${total}`;
         frutas_escolhidas = [];
+        segundos = TEMPO_TOTAL;
 
         // Resetar flashcards
         let fc_inner = document.querySelectorAll('.flashcard-inner');
@@ -194,6 +202,7 @@ resetButton.addEventListener('click', () => {
         });
 
         retirar_eventos();
+        embaralhar_frutas();
         atribuir_eventos();
 
         // iniciar 
@@ -213,3 +222,4 @@ function fecharModal(tipo) {
     document.getElementById(tipo).style.display = "none";
 }
 
+embaralhar_frutas();
