@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Memória - Multiplayer</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Jogo da Memória</h1>
+
+        <div>
+            <input type="text" id="username" placeholder="Seu nome" required>
+            <div class="badge" id="user-badge"></div>
+            <input type="text" id="room-code" placeholder="Código da Sala" required>
+            <div class="badge" id="room-badge"></div>
+            <button class="btn" id="create-room">Criar Sala</button>
+            <button class="btn" id="join-room">Entrar na Sala</button>
+        </div>
+
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/script.js"></script>
+</body>
+</html>
