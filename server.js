@@ -16,15 +16,43 @@ app.get("/", (_, res) => {
     res.render('index');
 });
 
+app.get("/keyAccess", (req, res) => {
+    const im = req.query.im;
+
+    console.log('[KEY_ACCESS_REQUEST] ' + im);
+
+    if (!im || !players[im]) {
+        console.log('[ACCESS_DENIED]>_ from '+ im);
+        return res.status(403).json({ forbidden: 'Access denied!' });
+    }
+    
+    console.log('[ACCESS_SUCCESS]>_ from ' + im);
+    console.log(JSON.stringify(players[im]));
+    console.log(players[im].keyAccess);
+    return res.json({ success: 'Access granted!' });
+});
+
+
 // criar hmtl com os nomes corretos
 function criar_sala(jogador1, jogador2, roomCode) {
     console.log('[CREATING] ' + roomCode);
     GAME_create_scope_room(jogador1, jogador2, roomCode);
-    
+
     // crypto
     const nomeSala = crypto.createHash('sha256').update(jogador1 + roomCode + jogador2).digest('hex');
+    const key1 = nomeSala.substring(0, 8);
+    const key2 = jogador1 + roomCode + jogador2;
+    const key3 = nomeSala.substring(nomeSala.length - 8, nomeSala.length);
+    const keyAccess = key1 + key2 + key3;
+    console.log('KEY_ACCESS', keyAccess);
+
+    // salvar no players
+    players[jogador1] = keyAccess;
+    players[jogador2] = keyAccess;
+
     console.log("[CRYPTO_SALA]: " + nomeSala);
     console.log("[SALA]: " + roomCode);
+
     app.get(`/game/${nomeSala}`, (_, res) => {
         res.render('game', { jogador1, jogador2, nomeSala, roomCode });
     });
@@ -195,12 +223,17 @@ function novo_namespace(nomeSala) {
             // limpar todos os dados
             const jogador1 = scopeRoom[nomeSala].jogador1;
             const jogador2 = scopeRoom[nomeSala].jogador2;
+
             delete scopeRoom[nomeSala];
+            delete jogarDeNovo[nomeSala];
+            delete players[jogador1];
+            delete players[jogador2];
+
             namespacesCreated[nomeSala] = false;
             console.log(`[RESTART_GAME]: ${jogador1} vs ${jogador2}}`)
             io.of(`/${nomeSala}`).emit('to-default', '');
             socket.to(nomeSala).emit('to-default', '');
-            
+
             console.log('[BEFORE_RESTART_GAME]>_');
             console.log(jogador1, jogador2, nomeSala);
             GAME_create_scope_room(jogador1, jogador2, nomeSala);
@@ -307,11 +340,16 @@ io.on("connection", (socket) => {
         }
     });
 
+    socket.on('attemp-invasion', () => {
+        console.log('######################## ATTEMPT INVASION ########################')
+    });
+
+
     socket.on('disconnect', () => {
         console.log("Jogador desconectado");
     });
 });
 
-server.listen(3000, () => {
+server.listen(3000, '0.0.0.0', () => {
     console.log("Servidor rodando na porta http://localhost:3000/");
 }); 
