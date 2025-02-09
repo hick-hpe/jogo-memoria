@@ -22,10 +22,10 @@ app.get("/keyAccess", (req, res) => {
     console.log('[KEY_ACCESS_REQUEST] ' + im);
 
     if (!im || !players[im]) {
-        console.log('[ACCESS_DENIED]>_ from '+ im);
+        console.log('[ACCESS_DENIED]>_ from ' + im);
         return res.status(403).json({ forbidden: 'Access denied!' });
     }
-    
+
     console.log('[ACCESS_SUCCESS]>_ from ' + im);
     console.log(JSON.stringify(players[im]));
     console.log(players[im].keyAccess);
@@ -66,8 +66,27 @@ let namespacesCreated = {};
 let jogarDeNovo = {};
 
 // ############################################## dados dataGameHandling ##############################################
-const frutas = ['abacaxi', 'pera', 'uva'];
-const emojis = { 'abacaxi': '🍍', 'pera': '🍐', 'uva': '🍇' };
+const frutas = [
+    'abacaxi',
+    'pera', 'uva',
+     'apple', 'cereja',
+    'abacate', 'melancia', 'morango', 'laranja', 'pessego', 'mirtilos', 'kiwi', 'banana'
+];
+const emojis = {
+    'abacaxi': '🍍',
+    'pera': '🍐',
+    'uva': '🍇',
+    'apple': '🍎',
+    'cereja': '🍒',
+    'abacate': '🥑',
+    'melancia': '🍉',
+    'morango': '🍓',
+    'laranja': '🍊',
+    'pessego': '🍑',
+    'mirtilos': '🫐',
+    'kiwi': '🥝',
+    'banana': '🍌'
+};
 let scopeRoom = {};
 
 function GAME_create_scope_room(jogador1, jogador2, roomCode) {
@@ -246,6 +265,7 @@ function novo_namespace(nomeSala) {
         socket.on('disconnect', () => {
             console.log(`[DISCONNECT]>_ ${socket.id}`);
             // del players
+            console.log('[XIIII]>_ ' + JSON.stringify(rooms[nomeSala]));
             const [j1, j2] = rooms[nomeSala];
             delete players[j1];
             delete players[j2];
