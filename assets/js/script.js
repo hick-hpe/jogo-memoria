@@ -1,5 +1,8 @@
 const socket = io();
+// salvar para excluir em caso de desconexão
+// localStorage.setItem('sockID', socket.id);
 
+// ------------------------------------------------------ elementos da interface do usuário ---------------------------------------
 const inputUsername = document.getElementById("username");
 const badgeUsername = document.getElementById("user-badge");
 const inputRoomCode = document.getElementById("room-code");
@@ -51,6 +54,9 @@ socket.on("create-user", (msg) => {
         badgeUsername.textContent = "Usuário criado com sucesso!";
         btnCreateRoom.innerHTML = '<img src="/img/loading.gif" alt=""> Cancelar';
         btnCreateRoom.classList.add('cancelar');
+
+        // salvar para excluir em caso de desconexão
+        localStorage.setItem('sockID', socket.id);
     }
 });
 
@@ -104,3 +110,9 @@ socket.on('entrar', ({ im, nomeSala }) => {
     window.location.href = "/game/" + nomeSala;
 });
 
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('sockID') !== null) {
+        socket.emit("del-sockID", localStorage.getItem('sockID'));
+    }
+});

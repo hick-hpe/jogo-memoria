@@ -55,7 +55,7 @@ function habilitar_socket() {
             const content = `
             <div class="flashcard">
                 <div class="flashcard-inner" id="flashcard-${id}" onclick="escolher_flashcard(event)">
-                    <div class="flashcard-front" id="ff-${id}">${frutas_id[id]}</div>
+                    <div class="flashcard-front" id="ff-${id}"></div>
                     <div class="flashcard-back" id="fb-${id}"></div>  
                 </div>
             </div>

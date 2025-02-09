@@ -60,6 +60,7 @@ function criar_sala(jogador1, jogador2, roomCode) {
 }
 
 const players = {};
+let socket_players = {};
 const rooms = {};
 let namespacesCreated = {};
 let jogarDeNovo = {};
@@ -244,20 +245,36 @@ function novo_namespace(nomeSala) {
 
         socket.on('disconnect', () => {
             console.log(`[DISCONNECT]>_ ${socket.id}`);
+            // del players
+            const [j1, j2] = rooms[nomeSala];
+            delete players[j1];
+            delete players[j2];
+            // del room 
             delete rooms[nomeSala];
             console.log('[DELETE_ROOM]>_' + JSON.stringify(rooms));
             io.of(`/${nomeSala}`).emit('ply-disconnect', '');
         });
-
     });
-
-
 }
 
 
 
 io.on("connection", (socket) => {
     console.log("Novo jogador conectado");
+
+    socket.on('del-sockID', (socketID) => {
+        console.log(`[DEL_SOCKID]>_ ${socketID}`);
+        const user = socket_players[socketID];
+        console.log('[USER_GET]>_' + user);
+        delete socket_players[socketID];
+        for (const room of Object.keys(rooms)) {
+            if (rooms[room].includes(user)) {
+                delete rooms[room];
+                break;
+            }
+        }
+        console.log('[DELETE_SOCKID]>_' + JSON.stringify(socket_players));
+    });
 
     // ------------------------------------------------------ criação ------------------------------------------------------
     socket.on("createRoom", ({ username, roomCode }) => {
@@ -275,6 +292,12 @@ io.on("connection", (socket) => {
         } else {
             players[username] = '';
             rooms[roomCode] = [username];
+            socket_players[socket.id] = username;
+
+
+            console.log("################## CREATE SOCKET_ID ##################");
+            console.log(JSON.stringify(socket_players));
+
             socket.emit("create-user", 'save');
             socket.emit("create-room", 'save');
             console.log(`[CREATE]>_ ${username} criou a sala ${roomCode}`);
@@ -317,6 +340,7 @@ io.on("connection", (socket) => {
             // Registra o jogador e adiciona à sala
             players[username] = '';
             rooms[roomCode].push(username);
+            socket_players[socket.id] = username;
 
             // Faz o socket entrar na sala para poder utilizar socket.to(roomCode)
             socket.join(roomCode);
