@@ -23,7 +23,6 @@ let data_vezDoJogador = '';
 
 // ######################################################## SOCKET ########################################################
 socket.on('startGame', ({ frutas_id, emojis, vezDoJogador }) => {
-    alert('im: ' + im);
     data_vezDoJogador = vezDoJogador;
     board.innerHTML = '';
     for (let id of Object.keys(frutas_id)) {
@@ -118,7 +117,6 @@ function escolher_flashcard(e) {
 }
 
 function fim_de_jogo() {
-    // clearInterval(interval);
     console.log('Fim de jogo!');
 }
 
@@ -134,8 +132,6 @@ function exibir_aviso_previo() {
             clearInterval(thisinterval);
             console.log('iniciar jogo!');
             divAvisoPrevio.innerHTML = 'JOGAR!!!';
-            // divTempo = document.querySelector('#tempo');
-            // divTempo.textContent = formatar_tempo();
         }
     }, 1000);
 
@@ -143,18 +139,6 @@ function exibir_aviso_previo() {
 
 function jogo_rodando() {
     console.log('Jogo rodando...');
-    // interval = setInterval(() => {
-    //     if (segundos > 0) {
-    //         segundos -= 1;
-    //         divTempo.textContent = formatar_tempo();
-    //         if (segundos <= 10) divTempo.style.color = 'red';
-    //     } else {
-    //         fim_de_jogo();
-    //         // showModal('modal-derrota');
-    //     }
-    // }, 1000);
-    // ################################### DELETE APAGARRRR ###################################
-    // socket_on_startGame();
 }
 
 function iniciar_jogo() {
@@ -182,8 +166,14 @@ socket.on('received-invite', () => {
     btnJogarNovamente.innerHTML = `Você foi convidado para jogar novamente!`;
 });
 
-socket.on('restart', (data) => {
-    alert('restarting...');
+socket.on('to-default', () => {
+    console.log('BUTTON');
+    btnJogarNovamente.innerHTML = 'Jogar Novamente';
+    btnJogarNovamente.disabled = false;
+    btnJogarNovamente.style.display = 'none';
+
+    divCartasJogador1.textContent = 0;
+    divCartasJogador2.textContent = 0;
 });
 
 socket.on('ply-disconnect', () => {

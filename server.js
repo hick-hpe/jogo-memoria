@@ -18,17 +18,9 @@ app.get("/", (_, res) => {
 
 // criar hmtl com os nomes corretos
 function criar_sala(jogador1, jogador2, roomCode) {
-    console.log('[CREATING] ' + roomCode)
-    scopeRoom[roomCode] = {
-        jogador1: jogador1,
-        jogador2: jogador2,
-        frutas: [],
-        frutas_id: {},
-        cartas_corretas_jogador1: new Set(),
-        cartas_corretas_jogador2: new Set(),
-        frutas_escolhidas: [],
-        vezDoJogador: jogador1
-    }
+    console.log('[CREATING] ' + roomCode);
+    GAME_create_scope_room(jogador1, jogador2, roomCode);
+    
     // crypto
     const nomeSala = crypto.createHash('sha256').update(jogador1 + roomCode + jogador2).digest('hex');
     console.log("[CRYPTO_SALA]: " + nomeSala);
@@ -49,11 +41,31 @@ const frutas = ['abacaxi', 'pera', 'uva'];
 const emojis = { 'abacaxi': '🍍', 'pera': '🍐', 'uva': '🍇' };
 let scopeRoom = {};
 
+function GAME_create_scope_room(jogador1, jogador2, roomCode) {
+    scopeRoom[roomCode] = {
+        jogador1: jogador1,
+        jogador2: jogador2,
+        frutas_id: {},
+        cartas_corretas_jogador1: new Set(),
+        cartas_corretas_jogador2: new Set(),
+        frutas_escolhidas: [],
+        vezDoJogador: jogador1
+    }
+}
+
 function GAME_embaralhar_frutas(nomeSala) {
     console.log('nomeSala: ' + nomeSala);
     console.log(nomeSala in scopeRoom);
-    scopeRoom[nomeSala].frutas = [...frutas, ...frutas].sort(() => Math.random() - 0.5);
-    scopeRoom[nomeSala].frutas_id = [...frutas, ...frutas].reduce((acc, fruit, index) => {
+
+    let frutas_duplicadas = [...frutas, ...frutas];
+    frutas_duplicadas = frutas_duplicadas.sort(() => Math.random() - 0.5);
+    frutas_duplicadas = frutas_duplicadas.sort(() => Math.random() - 0.5);
+    frutas_duplicadas = frutas_duplicadas.sort(() => Math.random() - 0.5);
+
+    console.log("[CREATING_SCOPE_ROOM]>_");
+    console.log(JSON.stringify(scopeRoom[nomeSala]));
+    scopeRoom[nomeSala].frutas_id = {};
+    scopeRoom[nomeSala].frutas_id = frutas_duplicadas.reduce((acc, fruit, index) => {
         acc[index] = fruit;
         return acc;
     }, {});
@@ -61,7 +73,33 @@ function GAME_embaralhar_frutas(nomeSala) {
 }
 // ###########################################################################################################################
 
+function GAME_start(socket, nomeSala) {
+    if (!(nomeSala in namespacesCreated) || !namespacesCreated[nomeSala]) {
+        console.log('[RANDOM_FRUITS]>_ embaralhar_frutas()');
+        namespacesCreated[nomeSala] = false;
+        GAME_embaralhar_frutas(nomeSala);
+        namespacesCreated[nomeSala] = true;
 
+        // ENVIAR PRO FRONT-END
+        console.log('[EMOJIS] ', emojis);
+        console.log("[FRUTAS_ID] ", scopeRoom[nomeSala].frutas_id);
+        console.log('[vezDoJogador]: ' + scopeRoom[nomeSala].vezDoJogador);
+
+        const data = {
+            frutas_id: scopeRoom[nomeSala].frutas_id,
+            emojis,
+            vezDoJogador: scopeRoom[nomeSala].vezDoJogador,
+        };
+        io.of(`/${nomeSala}`).emit("startGame", data);
+    } else {
+        const data = {
+            frutas_id: scopeRoom[nomeSala].frutas_id,
+            emojis,
+            vezDoJogador: scopeRoom[nomeSala].vezDoJogador,
+        };
+        io.of(`/${nomeSala}`).emit("startGame", data);
+    }
+}
 
 function novo_namespace(nomeSala) {
     console.log("#####################################################################################")
@@ -71,32 +109,7 @@ function novo_namespace(nomeSala) {
         console.log(`[NAMESPACE_${nomeSala}]>_ ${socket.id} conectou ao namespace ${nomeSala}`);
 
         // EMBARALHAR AS FRUTAS
-        if (!(nomeSala in namespacesCreated) || !namespacesCreated[nomeSala]) {
-            console.log('[RANDOM_FRUITS]>_ embaralhar_frutas()');
-            namespacesCreated[nomeSala] = false;
-            GAME_embaralhar_frutas(nomeSala);
-            namespacesCreated[nomeSala] = true;
-
-            // ENVIAR PRO FRONT-END
-            console.log('[EMOJIS] ', emojis);
-            console.log("[FRUTAS_ID] ", scopeRoom[nomeSala].frutas_id);
-            console.log('[vezDoJogador]: ' + scopeRoom[nomeSala].vezDoJogador);
-
-            const data = {
-                frutas_id: scopeRoom[nomeSala].frutas_id,
-                emojis,
-                vezDoJogador: scopeRoom[nomeSala].vezDoJogador,
-            };
-            socket.emit("startGame", data);
-        } else {
-            const data = {
-                frutas_id: scopeRoom[nomeSala].frutas_id,
-                emojis,
-                vezDoJogador: scopeRoom[nomeSala].vezDoJogador,
-            };
-            socket.emit("startGame", data);
-        }
-
+        GAME_start(socket, nomeSala);
 
         socket.on('flip-flashcard', ({ id, im }) => {
             console.log(`[FLIP_FLASHCARD]>_ ${im} virou a carta ${id}`);
@@ -180,14 +193,25 @@ function novo_namespace(nomeSala) {
             console.log('players play again: ' + jogarDeNovo[nomeSala]);
 
             // limpar todos os dados
-            // delete scope[nomeSala];
-            // const data = {};
-            io.of(nomeSala).emit('restart', '');
+            const jogador1 = scopeRoom[nomeSala].jogador1;
+            const jogador2 = scopeRoom[nomeSala].jogador2;
+            delete scopeRoom[nomeSala];
+            namespacesCreated[nomeSala] = false;
+            console.log(`[RESTART_GAME]: ${jogador1} vs ${jogador2}}`)
+            io.of(`/${nomeSala}`).emit('to-default', '');
+            socket.to(nomeSala).emit('to-default', '');
+            
+            console.log('[BEFORE_RESTART_GAME]>_');
+            console.log(jogador1, jogador2, nomeSala);
+            GAME_create_scope_room(jogador1, jogador2, nomeSala);
+            GAME_start(socket, nomeSala);
         });
 
         socket.on('disconnect', () => {
             console.log(`[DISCONNECT]>_ ${socket.id}`);
-            io.of(nomeSala).emit('ply-disconnect', '');
+            delete rooms[nomeSala];
+            console.log('[DELETE_ROOM]>_' + JSON.stringify(rooms));
+            io.of(`/${nomeSala}`).emit('ply-disconnect', '');
         });
 
     });
@@ -281,11 +305,6 @@ io.on("connection", (socket) => {
             // Envia evento para os demais sockets na sala (ou seja, o outro jogador)
             socket.to(roomCode).emit('entrar', { im: jogador1, nomeSala });
         }
-    });
-
-    // ------------------------------------------------------ game/chat ------------------------------------------------------
-    socket.on('key', ({ key, roomCode, jogador }) => {
-        socket.to(roomCode).emit('key', `${jogador} pressionou ${key}`);
     });
 
     socket.on('disconnect', () => {
