@@ -5,6 +5,7 @@ const divCartasJogador1 = document.querySelector("#cartasJogador1");
 const divCartasJogador2 = document.querySelector("#cartasJogador2");
 const divVezDoJogador = document.querySelector("#vez-do-jogador");
 const divAvisoPrevio = document.querySelector("#aviso-previo");
+const btnJogarNovamente = document.querySelector("#jogar-novamente");
 let divTempo;
 
 let im = localStorage.getItem("im")// || 'jogador1';
@@ -27,6 +28,7 @@ let stateGame = STATES[0];
 let executandoEfeito = false;
 
 let frutas_escolhidas = [];
+let clicouNaCarta = false;
 
 // ######################################################## SOCKET ########################################################
 function socket_on_startGame() {
@@ -77,9 +79,11 @@ function formatar_tempo() {
 }
 
 function escolher_flashcard(e) {
+    clicouNaCarta = true;
     const flashcard = e.target.closest('.flashcard-inner');
     const id = parseInt(flashcard.id.replace('flashcard-', ''));
     flashcard.classList.toggle('flip');
+    // setTimeout(() =>{}, 1000)
     // alert('enviando: ' + JSON.stringify({ id, im }));
     // socket.emit('flip-flashcard', { id, im });
 }
@@ -124,10 +128,23 @@ function jogo_rodando() {
     socket_on_startGame();
 }
 
+function veificaInatividade() {
+    setTimeout(() => {
+        if (!clicouNaCarta) {
+            console.log('perdeu a vez...');
+        } else {
+            clicouNaCarta = false;
+            console.log('continuou a vez...');
+        }
+    }, 3000);
+    console.log('Hello, World!');
+}
+
 function iniciar_jogo() {
     exibir_aviso_previo();
     setTimeout(() => {
         jogo_rodando();
+        veificaInatividade();
     }, 1000);
 }
 iniciar_jogo()

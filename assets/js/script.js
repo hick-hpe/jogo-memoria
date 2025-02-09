@@ -85,6 +85,10 @@ socket.on("join-room", (msg) => {
         inputRoomCode.value = "";
         badgeRoomCode.style.color = 'red';
         badgeRoomCode.textContent = "Sala não encontrada!";
+    } else if (msg == 'full') {
+        inputRoomCode.value = "";
+        badgeRoomCode.style.color = 'red';
+        badgeRoomCode.textContent = "Sala cheia!";
     } else {
         inputRoomCode.disabled = true;
         badgeRoomCode.style.color = 'green';

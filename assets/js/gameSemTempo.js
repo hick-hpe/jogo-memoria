@@ -5,43 +5,41 @@ const divCartasJogador1 = document.querySelector("#cartasJogador1");
 const divCartasJogador2 = document.querySelector("#cartasJogador2");
 const divVezDoJogador = document.querySelector("#vez-do-jogador");
 const divAvisoPrevio = document.querySelector("#aviso-previo");
-let divTempo;
+const btnJogarNovamente = document.querySelector("#jogar-novamente");
+btnJogarNovamente.style.display = "none";
 
-let im = localStorage.getItem("im")// || 'jogador1';
+let im = localStorage.getItem("im");
 
 console.log(`/${roomCode.value}`);
 const socket = io(`/${roomCode.value}`);
 
 // ######################################################## DADOS ########################################################
 
-const TEMPO_TOTAL = 60;
-let flashcards, interval, segundos = TEMPO_TOTAL;
-
+let flashcards;
 let STATES = { 0: 'init', 1: 'play', 2: 'ended' };
 let stateGame = STATES[0];
 let executandoEfeito = false;
 let data_vezDoJogador = '';
 
 // ######################################################## SOCKET ########################################################
-socket.on('startGame', ({ frutas, emojis, vezDoJogador }) => {
+socket.on('startGame', ({ frutas_id, emojis, vezDoJogador }) => {
+    alert('im: ' + im);
     data_vezDoJogador = vezDoJogador;
     board.innerHTML = '';
-    for (let i = 0; i < frutas.length; i++) {
+    for (let id of Object.keys(frutas_id)) {
         const content = `
             <div class="flashcard">
-                <div class="flashcard-inner" id="flashcard-${i}" onclick="escolher_flashcard(event)">
-                    <div class="flashcard-front" id="ff-${i}">${frutas[i]}</div>
-                    <div class="flashcard-back" id="fb-${i}"></div>  
+                <div class="flashcard-inner" id="flashcard-${id}" onclick="escolher_flashcard(event)">
+                    <div class="flashcard-front" id="ff-${id}">${frutas_id[id]}</div>
+                    <div class="flashcard-back" id="fb-${id}"></div>  
                 </div>
             </div>
         `;
         board.innerHTML += content;
 
         // Adiciona imagem na parte de trás da carta
-        const fb = document.querySelector(`#fb-${i}`);
-        // const fb = document.querySelector(`#ff-${i}`);
-        const emoji = emojis[frutas[i]];
-        // console.log("Emoji: " + emoji);
+        const fb = document.querySelector(`#fb-${id}`);
+        const emoji = emojis[frutas_id[id]];
         fb.innerHTML = emoji;
     }
 });
@@ -57,9 +55,37 @@ socket.on('vez-jogador', (vezDoJogador) => {
     divVezDoJogador.textContent = vezDoJogador;
 });
 
-socket.on('cartas-acertadas', ({ cartas_corretas_jogador1, cartas_corretas_jogador2 }) => {
+socket.on('cartas-acertadas', ({ cartas_corretas_jogador1, cartas_corretas_jogador2, total }) => {
     divCartasJogador1.textContent = cartas_corretas_jogador1;
     divCartasJogador2.textContent = cartas_corretas_jogador2;
+
+    if (total == cartas_corretas_jogador1 + cartas_corretas_jogador2) {
+        stateGame = STATES[2];
+        fim_de_jogo();
+
+        let conteudo = '';
+        if (cartas_corretas_jogador1 > cartas_corretas_jogador2) {
+            if (im === inputJogador1.value) {
+                conteudo = 'VOCÊ VENCEU!!!';
+            } else {
+                conteudo = 'VOCÊ PERDEU :(';
+            }
+        } else {
+            if (im === inputJogador2.value) {
+                conteudo = 'VOCÊ VENCEU!!!';
+            } else {
+                conteudo = 'VOCÊ PERDEU :(';
+            }
+        }
+
+        const MENSAGEM = `
+            FIM DE JOGO!!!! 
+            ${conteudo}
+        `;
+        alert(MENSAGEM);
+
+        btnJogarNovamente.style.display = "flex";
+    }
 });
 
 socket.on('flip-two', ({ f1, f2 }) => {
@@ -92,7 +118,7 @@ function escolher_flashcard(e) {
 }
 
 function fim_de_jogo() {
-    clearInterval(interval);
+    // clearInterval(interval);
     console.log('Fim de jogo!');
 }
 
@@ -107,9 +133,9 @@ function exibir_aviso_previo() {
         if (i < 0) {
             clearInterval(thisinterval);
             console.log('iniciar jogo!');
-            divAvisoPrevio.innerHTML = 'Tempo: <span id="tempo">0:00</span>';
-            divTempo = document.querySelector('#tempo');
-            divTempo.textContent = formatar_tempo();
+            divAvisoPrevio.innerHTML = 'JOGAR!!!';
+            // divTempo = document.querySelector('#tempo');
+            // divTempo.textContent = formatar_tempo();
         }
     }, 1000);
 
@@ -117,16 +143,16 @@ function exibir_aviso_previo() {
 
 function jogo_rodando() {
     console.log('Jogo rodando...');
-    interval = setInterval(() => {
-        if (segundos > 0) {
-            segundos -= 1;
-            divTempo.textContent = formatar_tempo();
-            if (segundos <= 10) divTempo.style.color = 'red';
-        } else {
-            fim_de_jogo();
-            // showModal('modal-derrota');
-        }
-    }, 1000);
+    // interval = setInterval(() => {
+    //     if (segundos > 0) {
+    //         segundos -= 1;
+    //         divTempo.textContent = formatar_tempo();
+    //         if (segundos <= 10) divTempo.style.color = 'red';
+    //     } else {
+    //         fim_de_jogo();
+    //         // showModal('modal-derrota');
+    //     }
+    // }, 1000);
     // ################################### DELETE APAGARRRR ###################################
     // socket_on_startGame();
 }
@@ -138,6 +164,32 @@ function iniciar_jogo() {
     }, 1000);
 }
 iniciar_jogo()
+
+btnJogarNovamente.onclick = () => {
+    if (btnJogarNovamente.innerHTML === 'Jogar Novamente') {
+        const jogador = im === inputJogador1.value ? inputJogador2.value : inputJogador1.value;
+        btnJogarNovamente.disabled = true;
+        btnJogarNovamente.innerHTML = `
+            <img src="/img/loading.gif" alt="carregando"> <i>Esperando ${jogador} aceitar</i>
+        `;
+        socket.emit('invite-play-again', im);
+    } else {
+        socket.emit('acept-play-again', im);
+    }
+}
+
+socket.on('received-invite', () => {
+    btnJogarNovamente.innerHTML = `Você foi convidado para jogar novamente!`;
+});
+
+socket.on('restart', (data) => {
+    alert('restarting...');
+});
+
+socket.on('ply-disconnect', () => {
+    window.location.href = '/';
+});
+
 
 // ######################################################## MODAL ########################################################
 

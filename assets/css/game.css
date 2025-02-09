@@ -12,7 +12,7 @@ body {
     align-items: center;
     gap: 20px;
     height: 100vh;
-    overflow-y: hidden;
+    /* overflow-y: hidden; */
 }
 
 
@@ -35,6 +35,17 @@ body {
     justify-content: space-between;
     width: 100%;
     padding: 20px;
+}
+
+
+#jogar-novamente {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#jogar-novamente img {
+    width: 30px;
 }
 
 /* ------------------------------------------------------- container ------------------------------------------------------- */
