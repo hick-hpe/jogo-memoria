@@ -7,7 +7,7 @@
   <title>Sala de Jogo</title>
 </head>
 
-<body onload="fecharModal('modal-vitoria'); fecharModal('modal-derrota');">
+<body>
   <div class="header">
     <h1>Sala: 123</h1>
     <div class="jogadores">
@@ -36,22 +36,22 @@
   </div>
 
   <!-- Modal de Vitória -->
-  <div id="modal-vitoria" class="modal">
+  <!-- <div id="modal-vitoria" class="modal">
     <div class="modal-content vitoria">
       <h2>🎉 Vitória!</h2>
-      <p>Parabéns! Você completou o desafio!</p>
+      <p>Você venceu!!!</p>
       <button onclick="fecharModal('modal-vitoria')">OK</button>
     </div>
-  </div>
+  </div> -->
 
   <!-- Modal de Derrota -->
-  <div id="modal-derrota" class="modal">
+  <!-- <div id="modal-derrota" class="modal">
     <div class="modal-content derrota">
       <h2>💀 Derrota!</h2>
-      <p>O tempo acabou! Tente novamente.</p>
+      <p><strong>Jogador 1</strong> venceu!!!</p>
       <button onclick="fecharModal('modal-derrota')">Tentar de Novo</button>
     </div>
-  </div>
+  </div> -->
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/assets/js/game.js"></script>

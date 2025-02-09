@@ -8,6 +8,8 @@ const divAvisoPrevio = document.querySelector("#aviso-previo");
 const btnJogarNovamente = document.querySelector("#jogar-novamente");
 let divTempo;
 
+
+
 let im = localStorage.getItem("im")// || 'jogador1';
 
 console.log(`/${roomCode.value}`);

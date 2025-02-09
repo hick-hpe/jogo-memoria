@@ -200,6 +200,8 @@ function novo_namespace(nomeSala) {
                     cartas_corretas_jogador2: cj2,
                     total: Object.keys(scopeRoom[nomeSala].frutas_id).length
                 }
+                console.log('[cartas-acertadas]>_');
+                console.log(JSON.stringify(data));
                 io.of(nomeSala).emit('cartas-acertadas', data);
             }
 
@@ -338,10 +340,6 @@ io.on("connection", (socket) => {
             // Envia evento para os demais sockets na sala (ou seja, o outro jogador)
             socket.to(roomCode).emit('entrar', { im: jogador1, nomeSala });
         }
-    });
-
-    socket.on('attemp-invasion', () => {
-        console.log('######################## ATTEMPT INVASION ########################')
     });
 
 

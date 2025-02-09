@@ -37,7 +37,6 @@ body {
     padding: 20px;
 }
 
-
 #jogar-novamente {
     display: flex;
     align-items: center;
@@ -140,17 +139,22 @@ body {
 }
 
 /* Modal Vitória */
-.vitoria {
+.vitoria,
+.derrota {
     background-color: #28a745;
     /* Verde */
     color: white;
+    
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 /* Modal Derrota */
 .derrota {
     background-color: #dc3545;
     /* Vermelho */
-    color: white;
 }
 
 /* Botão dentro dos modais */

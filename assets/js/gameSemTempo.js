@@ -1,12 +1,14 @@
 const inputJogador1 = document.querySelector("#jogador1");
 const inputJogador2 = document.querySelector("#jogador2");
 const inputRoomCode = document.querySelector("#roomCode");
-const divCartasJogador1 = document.querySelector("#cartasJogador1");
-const divCartasJogador2 = document.querySelector("#cartasJogador2");
-const divVezDoJogador = document.querySelector("#vez-do-jogador");
+let divCartasJogador1 = document.querySelector("#cartasJogador1");
+let divCartasJogador2 = document.querySelector("#cartasJogador2");
+let divVezDoJogador = document.querySelector("#vez-do-jogador");
 const divAvisoPrevio = document.querySelector("#aviso-previo");
-const btnJogarNovamente = document.querySelector("#jogar-novamente");
-btnJogarNovamente.style.display = "none";
+let btnJogarNovamente;
+//  = document.getElementById("jogar-novamente");
+console.log('[BUTTON_JOGAR]: none');
+document.getElementById("jogar-novamente").style.display = 'none';
 
 let im = localStorage.getItem("im");
 // Verificar permissão
@@ -28,18 +30,13 @@ fetch(URL_ACCESS)
         console.log(`/${roomCode.value}`);
         socket = io(`/${roomCode.value}`);
         console.log('connect to game!!!!');
-        habilitar();
+        habilitar_socket();
 
-        // alert('ESPEREEE');
-    }) // Exibe os dados retornados
+    })
     .catch(err => {
         window.location.href = '/';
     });
 
-
-// console.log(`/${roomCode.value}`);
-// socket = io(`/${roomCode.value}`);
-// console.log('connect to game!!!!');
 
 // ######################################################## DADOS ########################################################
 
@@ -50,7 +47,7 @@ let executandoEfeito = false;
 let data_vezDoJogador = '';
 
 // ######################################################## SOCKET ########################################################
-function habilitar(){
+function habilitar_socket() {
     socket.on('startGame', ({ frutas_id, emojis, vezDoJogador }) => {
         data_vezDoJogador = vezDoJogador;
         board.innerHTML = '';
@@ -84,35 +81,57 @@ function habilitar(){
     });
 
     socket.on('cartas-acertadas', ({ cartas_corretas_jogador1, cartas_corretas_jogador2, total }) => {
-        divCartasJogador1.textContent = cartas_corretas_jogador1;
-        divCartasJogador2.textContent = cartas_corretas_jogador2;
+        document.querySelector('#cartasJogador1').textContent = cartas_corretas_jogador1;
+        document.querySelector('#cartasJogador2').textContent = cartas_corretas_jogador2;
 
         if (total == cartas_corretas_jogador1 + cartas_corretas_jogador2) {
             stateGame = STATES[2];
             fim_de_jogo();
 
-            let conteudo = '';
+
+            let venceu = false;
             if (cartas_corretas_jogador1 > cartas_corretas_jogador2) {
                 if (im === inputJogador1.value) {
-                    conteudo = 'VOCÊ VENCEU!!!';
+                    venceu = true;
                 } else {
-                    conteudo = 'VOCÊ PERDEU :(';
+                    venceu = false;
                 }
             } else {
                 if (im === inputJogador2.value) {
-                    conteudo = 'VOCÊ VENCEU!!!';
+                    venceu = true;
                 } else {
-                    conteudo = 'VOCÊ PERDEU :(';
+                    venceu = false;
                 }
             }
 
-            const MENSAGEM = `
-            FIM DE JOGO!!!! 
-            ${conteudo}
-        `;
-            alert(MENSAGEM);
+            let conteudo_modal = '';
+            if (venceu) {
+                conteudo_modal = `
+                    <div id="modal-vitoria" class="modal">
+                        <div class="modal-content vitoria">
+                        <h2>🎉 Vitória!</h2>
+                        <p>Você venceu!!!</p>
+                        <button onclick="fecharModal('modal-vitoria')">OK</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                conteudo_modal = `
+                    <div id="modal-derrota" class="modal">
+                        <div class="modal-content derrota">
+                        <h2>💀 Derrota!</h2>
+                        <p><strong>${im === inputJogador1.value ? inputJogador2.value : inputJogador1.value}</strong> venceu!!!</p>
+                        <button onclick="fecharModal('modal-derrota')">Tentar de Novo</button>
+                    </div>
+                `;
+            }
 
+            if (!document.body.innerHTML.includes(conteudo_modal)) document.body.innerHTML += conteudo_modal;
+
+            console.log('[BUTTON_JOGAR]: flex');
+            btnJogarNovamente = document.getElementById("jogar-novamente");
             btnJogarNovamente.style.display = "flex";
+            habilitar_btn();
         }
     });
 
@@ -130,15 +149,17 @@ function habilitar(){
 
     socket.on('to-default', () => {
         console.log('BUTTON');
-        btnJogarNovamente.innerHTML = 'Jogar Novamente';
-        btnJogarNovamente.disabled = false;
-        btnJogarNovamente.style.display = 'none';
 
-        divCartasJogador1.textContent = 0;
-        divCartasJogador2.textContent = 0;
+        document.querySelector('#cartasJogador1').textContent = 0;
+        document.querySelector('#cartasJogador2').textContent = 0;
 
         data_vezDoJogador = inputJogador1.value;
-        divVezDoJogador = inputJogador1.value;
+        document.querySelector('#vez-do-jogador').textContent = inputJogador1.value;
+
+        btnJogarNovamente.textContent = "Jogar Novamente";
+        btnJogarNovamente.style.display = 'none';
+
+        document.querySelectorAll('.modal').forEach(modal => modal.remove());
     });
 
     socket.on('ply-disconnect', () => {
@@ -148,6 +169,22 @@ function habilitar(){
 
 
 // ######################################################## FUNÇÕES ########################################################
+function habilitar_btn() {
+    btnJogarNovamente.addEventListener('click', () => {
+        console.log('[click]: ' + btnJogarNovamente.textContent);
+
+        if (btnJogarNovamente.innerHTML === 'Jogar Novamente') {
+            const jogador = im === inputJogador1.value ? inputJogador2.value : inputJogador1.value;
+            btnJogarNovamente.innerHTML = `
+                <img src="/img/loading.gif" alt="carregando"> <i>Esperando ${jogador} aceitar</i>
+            `;
+            socket.emit('invite-play-again', im);
+        } else {
+            socket.emit('acept-play-again', im);
+        }
+    });
+}
+
 function formatar_tempo() {
     return `0${parseInt(segundos / 60)}:${segundos % 60 < 10 ? '0' : ''}${segundos % 60}`;
 }
@@ -198,21 +235,7 @@ function iniciar_jogo() {
         jogo_rodando();
     }, 1000);
 }
-iniciar_jogo()
-
-btnJogarNovamente.onclick = () => {
-    if (btnJogarNovamente.innerHTML === 'Jogar Novamente') {
-        const jogador = im === inputJogador1.value ? inputJogador2.value : inputJogador1.value;
-        btnJogarNovamente.disabled = true;
-        btnJogarNovamente.innerHTML = `
-            <img src="/img/loading.gif" alt="carregando"> <i>Esperando ${jogador} aceitar</i>
-        `;
-        socket.emit('invite-play-again', im);
-    } else {
-        socket.emit('acept-play-again', im);
-    }
-}
-
+iniciar_jogo();
 
 // ######################################################## MODAL ########################################################
 
