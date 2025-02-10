@@ -69,23 +69,23 @@ let jogarDeNovo = {};
 const frutas = [
     'abacaxi',
     'pera', 'uva',
-    // 'apple', 'cereja',
-    // 'abacate', 'melancia', 'morango', 'laranja', 'pessego', 'mirtilos', 'kiwi', 'banana'
+    'apple', 'cereja',
+    'abacate', 'melancia', 'morango', 'laranja', 'pessego', 'mirtilos', 'kiwi', 'banana'
 ];
 const emojis = {
     'abacaxi': '🍍',
     'pera': '🍐',
     'uva': '🍇',
-    // 'apple': '🍎',
-    // 'cereja': '🍒',
-    // 'abacate': '🥑',
-    // 'melancia': '🍉',
-    // 'morango': '🍓',
-    // 'laranja': '🍊',
-    // 'pessego': '🍑',
-    // 'mirtilos': '🫐',
-    // 'kiwi': '🥝',
-    // 'banana': '🍌'
+    'apple': '🍎',
+    'cereja': '🍒',
+    'abacate': '🥑',
+    'melancia': '🍉',
+    'morango': '🍓',
+    'laranja': '🍊',
+    'pessego': '🍑',
+    'mirtilos': '🫐',
+    'kiwi': '🥝',
+    'banana': '🍌'
 };
 let scopeRoom = {};
 let iniciarJogo = {};
@@ -295,17 +295,9 @@ function novo_namespace(nomeSala) {
         });
 
         socket.on('disconnect', () => {
-            console.log(`[DISCONNECT]>_ ${socket.id}`);
-            // del players
-            console.log('[PODE_DAR_RUINN]>_ ' + JSON.stringify(rooms));
-            // console.log('[XIIII]>_ ' + JSON.stringify(rooms[nomeSala]));
-            // const [j1, j2] = rooms[nomeSala];
-            // delete players[j1];
-            // delete players[j2];
-            // del room 
-            delete rooms[nomeSala];
-            console.log('[DELETE_ROOM]>_' + JSON.stringify(rooms));
-            io.of(`/${nomeSala}`).emit('ply-disconnect', '');
+            console.log(`[DISCONNECT_GAME]>_ ${socket.id}`);
+            console.log('players: ' + JSON.stringify(players));
+            console.log('socket_players: ' + JSON.stringify(socket_players));
         });
     });
 }

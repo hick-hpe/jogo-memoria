@@ -1,4 +1,5 @@
 const socket = io();
+localStorage.setItem('im', null);
 
 // ------------------------------------------------------ elementos da interface do usuário ---------------------------------------
 const inputUsername = document.getElementById("username");

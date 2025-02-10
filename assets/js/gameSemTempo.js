@@ -185,6 +185,7 @@ function habilitar_socket() {
     });
 
     socket.on('ply-disconnect', () => {
+        alert('bye-bye-bye');
         window.location.href = '/';
     });
 

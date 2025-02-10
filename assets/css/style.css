@@ -117,6 +117,11 @@ button:hover {
     max-width: 100%;
 }
 
+.modal-content ol {
+    margin: 0 20px;
+    text-align: start;
+}
+
 .ok:hover {
     transform: scale(1);
 }
