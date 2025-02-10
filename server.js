@@ -69,25 +69,26 @@ let jogarDeNovo = {};
 const frutas = [
     'abacaxi',
     'pera', 'uva',
-     'apple', 'cereja',
-    'abacate', 'melancia', 'morango', 'laranja', 'pessego', 'mirtilos', 'kiwi', 'banana'
+    // 'apple', 'cereja',
+    // 'abacate', 'melancia', 'morango', 'laranja', 'pessego', 'mirtilos', 'kiwi', 'banana'
 ];
 const emojis = {
     'abacaxi': '🍍',
     'pera': '🍐',
     'uva': '🍇',
-    'apple': '🍎',
-    'cereja': '🍒',
-    'abacate': '🥑',
-    'melancia': '🍉',
-    'morango': '🍓',
-    'laranja': '🍊',
-    'pessego': '🍑',
-    'mirtilos': '🫐',
-    'kiwi': '🥝',
-    'banana': '🍌'
+    // 'apple': '🍎',
+    // 'cereja': '🍒',
+    // 'abacate': '🥑',
+    // 'melancia': '🍉',
+    // 'morango': '🍓',
+    // 'laranja': '🍊',
+    // 'pessego': '🍑',
+    // 'mirtilos': '🫐',
+    // 'kiwi': '🥝',
+    // 'banana': '🍌'
 };
 let scopeRoom = {};
+let iniciarJogo = {};
 
 function GAME_create_scope_room(jogador1, jogador2, roomCode) {
     scopeRoom[roomCode] = {
@@ -156,8 +157,36 @@ function novo_namespace(nomeSala) {
     io.of(`/${nomeSala}`).on('connection', (socket) => {
         console.log(`[NAMESPACE_${nomeSala}]>_ ${socket.id} conectou ao namespace ${nomeSala}`);
 
-        // EMBARALHAR AS FRUTAS
-        GAME_start(socket, nomeSala);
+
+        socket.on('confirm-ply', (im) => {
+            console.log('[THE_ROOM_OF_THE_GAME]>_ ' + JSON.stringify(jogarDeNovo));
+
+            console.log(`[CONFIRMPLY]>_ ${im} confirmou a jogada`);
+            if (!(nomeSala in iniciarJogo)) {
+                iniciarJogo[nomeSala] = [im];
+            } else {
+                iniciarJogo[nomeSala].push(im);
+            }
+            
+            console.log('esperando... ' + JSON.stringify(iniciarJogo));
+
+            if (iniciarJogo[nomeSala].length === 2) {
+                console.log('[INICIAR_JOGO]');
+                console.log('[ROOM_CONFIRM_JOGO]>_ ' + JSON.stringify(jogarDeNovo));
+                socket.emit('iniciar-musica');
+                socket.broadcast.emit('iniciar-musica');
+                // EMBARALHAR AS FRUTAS
+                delete iniciarJogo[nomeSala];
+                GAME_start(socket, nomeSala);
+            } else {
+                console.log('[ROOM_CONFIRM_JOGO]>_ ' + JSON.stringify(jogarDeNovo));
+                console.log(`[ALERT]>_  [${im}] esperando jogador...]`);
+                socket.emit('esperar-ply', '');
+                console.log('[SEND_WAIT_PLY]');
+                socket.broadcast.emit('falta-vc', '');
+            }
+        });
+
 
         socket.on('flip-flashcard', ({ id, im }) => {
             console.log(`[FLIP_FLASHCARD]>_ ${im} virou a carta ${id}`);
@@ -181,6 +210,9 @@ function novo_namespace(nomeSala) {
                     const [j1, j2] = [scopeRoom[nomeSala].jogador1, scopeRoom[nomeSala].jogador2];
                     console.log("jogador1: " + j1);
                     console.log("jogador2: " + j2);
+
+                    socket.emit('encontrou-par', '');
+                    socket.broadcast.emit('encontrou-par', '');
 
                     if (im === j1) {
                         console.log('[JOGADOR1]>_ + 1 acerto');
@@ -266,10 +298,10 @@ function novo_namespace(nomeSala) {
             console.log(`[DISCONNECT]>_ ${socket.id}`);
             // del players
             console.log('[PODE_DAR_RUINN]>_ ' + JSON.stringify(rooms));
-            console.log('[XIIII]>_ ' + JSON.stringify(rooms[nomeSala]));
-            const [j1, j2] = rooms[nomeSala];
-            delete players[j1];
-            delete players[j2];
+            // console.log('[XIIII]>_ ' + JSON.stringify(rooms[nomeSala]));
+            // const [j1, j2] = rooms[nomeSala];
+            // delete players[j1];
+            // delete players[j2];
             // del room 
             delete rooms[nomeSala];
             console.log('[DELETE_ROOM]>_' + JSON.stringify(rooms));

@@ -5,10 +5,17 @@ let divCartasJogador1 = document.querySelector("#cartasJogador1");
 let divCartasJogador2 = document.querySelector("#cartasJogador2");
 let divVezDoJogador = document.querySelector("#vez-do-jogador");
 const divAvisoPrevio = document.querySelector("#aviso-previo");
+const modalConfirm = document.querySelector("#modal-confirm");
+const btnConfirm = document.querySelector("#btn-confirm");
 let btnJogarNovamente;
-//  = document.getElementById("jogar-novamente");
 console.log('[BUTTON_JOGAR]: none');
 document.getElementById("jogar-novamente").style.display = 'none';
+
+const audioDuranteJogo = new Audio('/sounds/durante-jogo.mp3'); //
+const audioVitoria = new Audio('/sounds/vitoria.mp3');
+const audioDerrota = new Audio('/sounds/derrota.mp3');
+const audioAcertou = new Audio('/sounds/acertou.mp3');
+const audioErrou = new Audio('/sounds/errou.mp3');
 
 let im = localStorage.getItem("im");
 // Verificar permissão
@@ -88,7 +95,6 @@ function habilitar_socket() {
             stateGame = STATES[2];
             fim_de_jogo();
 
-
             let venceu = false;
             if (cartas_corretas_jogador1 > cartas_corretas_jogador2) {
                 if (im === inputJogador1.value) {
@@ -104,6 +110,7 @@ function habilitar_socket() {
                 }
             }
 
+            audioDuranteJogo.pause();
             let conteudo_modal = '';
             if (venceu) {
                 conteudo_modal = `
@@ -115,6 +122,7 @@ function habilitar_socket() {
                         </div>
                     </div>
                 `;
+                audioVitoria.play();
             } else {
                 conteudo_modal = `
                     <div id="modal-derrota" class="modal">
@@ -124,6 +132,7 @@ function habilitar_socket() {
                         <button onclick="fecharModal('modal-derrota')">Tentar de Novo</button>
                     </div>
                 `;
+                audioDerrota.play();
             }
 
             if (!document.body.innerHTML.includes(conteudo_modal)) document.body.innerHTML += conteudo_modal;
@@ -135,8 +144,14 @@ function habilitar_socket() {
         }
     });
 
+    socket.on('encontrou-par', () => {
+        audioAcertou.play();
+    });
+
     socket.on('flip-two', ({ f1, f2 }) => {
         console.log('Ambos jogadores viraram cartas');
+        audioErrou.play();
+
         const fc1 = document.querySelector(`#flashcard-${f1}`);
         const fc2 = document.querySelector(`#flashcard-${f2}`);
         fc1.classList.toggle('flip');
@@ -160,15 +175,48 @@ function habilitar_socket() {
         btnJogarNovamente.style.display = 'none';
 
         document.querySelectorAll('.modal').forEach(modal => modal.remove());
+        audioDuranteJogo.pause();
+        audioDuranteJogo.currentTime = 0;
+        audioVitoria.pause();
+        audioVitoria.currentTime = 0;
+        audioDerrota.pause();
+        audioDerrota.currentTime = 0;
+        audioDuranteJogo.play();
     });
 
     socket.on('ply-disconnect', () => {
         window.location.href = '/';
     });
+
+    socket.on('esperar-ply', () => {
+        console.log('[MY_SELF]: wating');
+        btnConfirm.innerHTML = '<img src="/img/loading.gif" alt=""><i>Esperando jogador...</i>';
+        btnConfirm.classList.add('ed');
+        btnConfirm.disabled = true;
+    });
+
+    socket.on('falta-vc', () => {
+        const ply = im == inputJogador1.value ? inputJogador2.value : inputJogador1.value;
+        btnConfirm.textContent = `${ply} está esperando você aceitar...`;
+    });
+
+    socket.on('iniciar-musica', () => {
+        modalConfirm.style.display = 'none';
+        console.log('[iniciar-musica]');
+        audioDuranteJogo.play();
+
+        audioDuranteJogo.addEventListener('ended', () => {
+            audioDuranteJogo.play();
+        });
+    });
 }
 
 
 // ######################################################## FUNÇÕES ########################################################
+btnConfirm.addEventListener('click', () => {
+    socket.emit('confirm-ply', im);
+});
+
 function habilitar_btn() {
     btnJogarNovamente.addEventListener('click', () => {
         console.log('[click]: ' + btnJogarNovamente.textContent);
@@ -209,19 +257,6 @@ function fim_de_jogo() {
 }
 
 function exibir_aviso_previo() {
-    // let i = 4;
-    let i = 0;
-
-    console.log('preparando...');
-    let thisinterval = setInterval(() => {
-        divAvisoPrevio.innerHTML = `Começando em ${i}...`;
-        i--;
-        if (i < 0) {
-            clearInterval(thisinterval);
-            console.log('iniciar jogo!');
-            divAvisoPrevio.innerHTML = 'JOGAR!!!';
-        }
-    }, 1000);
 
 }
 

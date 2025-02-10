@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jogo da Memória - Multiplayer</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
+
 <body>
     <div class="container">
         <h1>Jogo da Memória</h1>
 
-        <div>
+        <div id="form-data">
             <input type="text" id="username" placeholder="Seu nome" required autofocus>
             <div class="badge" id="user-badge"></div>
             <input type="text" id="room-code" placeholder="Código da Sala" required>
@@ -18,10 +20,23 @@
             <button class="btn" id="create-room">Criar Sala</button>
             <button class="btn" id="join-room">Entrar na Sala</button>
         </div>
+    </div>
 
+    <div class="modal">
+        <div class="modal-content">
+            <h1>Seja bem-vindo ao Jogo da Memória Multiplayer!</h1>
+            <p>Crie ou entre em salas para jogar contra amigos.</p>
+            <p>Para jogar, escolha duas cartas no tabuleiro e elas devem ser iguais.</p>
+            <p>Vence a pessoa que conseguir acertar todas as cartas antes que o seu adversário.</p>
+            <p>Para sair da sala, clique no botão "Sair".</p>
+            <button class="btn ok" onclick="fechar_modal()">
+                OK, entendi
+            </button>
+        </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/script.js"></script>
 </body>
+
 </html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testando áudios</title>
+</head>
+<body>
+    <h1>Testando áudios</h1>
+    <button id="btn-tela-inicial">Tela inicial</button>
+    <button id="btn-durante-jogo">Durante o jogo</button>
+    <button id="btn-encontrou-par">Encontrou um par</button>
+    <button id="btn-nao-encontrou-par">Não encontrou um par</button>
+    <button id="btn-vitoria">Vitória</button>
+    <button id="btn-derrota">Derrota</button>
+
+    <script>
+        // Criando um objeto com os áudios
+        const audioFiles = {
+            "btn-tela-inicial": new Audio('/assets/sounds/tela-inicial.mp3'),
+            "btn-durante-jogo": new Audio('/assets/sounds/durante-jogo.mp3'),
+            "btn-encontrou-par": new Audio('/assets/sounds/encontrou-par.mp3'),
+            "btn-nao-encontrou-par": new Audio('/assets/sounds/nao-encontrou-par.mp3'),
+            "btn-vitoria": new Audio('/assets/sounds/vitoria.mp3'),
+            "btn-derrota": new Audio('/assets/sounds/derrota.mp3'),
+        };
+
+        // Adicionando evento de clique para cada botão
+        Object.keys(audioFiles).forEach(buttonId => {
+            const button = document.getElementById(buttonId);
+            if (button) {
+                button.addEventListener('click', () => playAudio(audioFiles[buttonId]));
+            }
+        });
+
+        // Função para tocar áudio com tratamento de erro
+        function playAudio(audio) {
+            console.log(`Tocando: ${audio.src}`);
+            audio.play().catch(error => console.error("Erro ao tocar áudio:", error));
+            audio.addEventListener('ended', () => {
+                // loop
+                audio.play();
+            });
+        }
+
+
+    </script>
+</body>
+</html>

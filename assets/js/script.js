@@ -10,7 +10,6 @@ const badgeRoomCode = document.getElementById("room-badge");
 const btnCreateRoom = document.getElementById("create-room");
 const btnJoinRoom = document.getElementById("join-room");
 
-
 // ------------------------------------------------------ eventos ------------------------------------------------------
 btnCreateRoom.addEventListener("click", () => {
     const username = inputUsername.value;
@@ -116,3 +115,10 @@ document.addEventListener('DOMContentLoaded', () => {
         socket.emit("del-sockID", localStorage.getItem('sockID'));
     }
 });
+
+
+function fechar_modal() {
+    document.querySelector('.modal').style.display = 'none';
+    const audio = new Audio('/sounds/tela-inicial.mp3');
+    audio.play();
+}
