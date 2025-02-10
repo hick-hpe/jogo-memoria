@@ -315,19 +315,19 @@ function novo_namespace(nomeSala) {
 io.on("connection", (socket) => {
     console.log("Novo jogador conectado");
 
-    socket.on('del-sockID', (socketID) => {
-        console.log(`[DEL_SOCKID]>_ ${socketID}`);
-        const user = socket_players[socketID];
-        console.log('[USER_GET]>_' + user);
-        delete socket_players[socketID];
-        for (const room of Object.keys(rooms)) {
-            if (rooms[room].includes(user)) {
-                delete rooms[room];
-                break;
-            }
-        }
-        console.log('[DELETE_SOCKID]>_' + JSON.stringify(socket_players));
-    });
+    // socket.on('del-sockID', (socketID) => {
+    //     console.log(`[DEL_SOCKID]>_ ${socketID}`);
+    //     const user = socket_players[socketID];
+    //     console.log('[USER_GET]>_' + user);
+    //     delete socket_players[socketID];
+    //     for (const room of Object.keys(rooms)) {
+    //         if (rooms[room].includes(user)) {
+    //             delete rooms[room];
+    //             break;
+    //         }
+    //     }
+    //     console.log('[DELETE_SOCKID]>_' + JSON.stringify(socket_players));
+    // });
 
     // ------------------------------------------------------ criação ------------------------------------------------------
     socket.on("createRoom", ({ username, roomCode }) => {
@@ -422,6 +422,18 @@ io.on("connection", (socket) => {
 
     socket.on('disconnect', () => {
         console.log("Jogador desconectado");
+        console.log('[TRY_DELETE_USER]>_');
+        const user = socket_players[socket.id];
+
+        for (const room of Object.keys(rooms)) {
+            console.log(`sala: ${room}`);
+            console.log(`players: ${rooms[room]}`);
+            console.log();
+
+            if (room.includes(user)) delete rooms[room];
+        }
+
+        console.log('[DELETE_USER]>_ ' + user);
     });
 });
 

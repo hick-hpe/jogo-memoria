@@ -1,6 +1,4 @@
 const socket = io();
-// salvar para excluir em caso de desconexão
-// localStorage.setItem('sockID', socket.id);
 
 // ------------------------------------------------------ elementos da interface do usuário ---------------------------------------
 const inputUsername = document.getElementById("username");
@@ -110,15 +108,10 @@ socket.on('entrar', ({ im, nomeSala }) => {
 });
 
 
-document.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('sockID') !== null) {
-        socket.emit("del-sockID", localStorage.getItem('sockID'));
-    }
-});
-
-
 function fechar_modal() {
     document.querySelector('.modal').style.display = 'none';
     const audio = new Audio('/sounds/tela-inicial.mp3');
     audio.play();
+
+    audio.addEventListener('ended', () => audio.play());
 }
