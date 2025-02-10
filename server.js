@@ -265,6 +265,7 @@ function novo_namespace(nomeSala) {
         socket.on('disconnect', () => {
             console.log(`[DISCONNECT]>_ ${socket.id}`);
             // del players
+            console.log('[PODE_DAR_RUINN]>_ ' + JSON.stringify(rooms));
             console.log('[XIIII]>_ ' + JSON.stringify(rooms[nomeSala]));
             const [j1, j2] = rooms[nomeSala];
             delete players[j1];
